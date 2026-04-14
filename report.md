@@ -173,12 +173,17 @@ The memory image is quite large and can be downloaded from the provided URL.
 ![alt text](image-6.png)
 2.  **Kiểm tra tiến trình:** `windows.pslist` để tìm tiến trình lạ.
 ![alt text](image-7.png)
-3.  **Quét file:** `windows.filescan | grep -E "flag|secret|document"`.
-4.  **Phân tích bẫy:** Sử dụng `strings memory.dmp | grep "FLAG{D"` để lọc thẳng flag đúng, loại bỏ decoy `FLAG{H`.
-5.  **Dump tiến trình:** Nếu flag nằm trong bộ nhớ của một app (như Notepad), thực hiện `windows.memmap --pid <PID> --dump`.
+3.  **Quét file:** `Dump tiến trình notepad và lọc theo các lệnh powershell. Một chuỗi kí tự được lặp đi lặp lại nhiều lần.`.
+![alt text](image-8.png)
+4.  **Decode bằng CyberChef** Ta được một chuỗi nối Thành 1 URl
+
+![alt text](image-10.png)
+
+5.  **Decode chuỗi ghep được** Ta được flag.
+![alt text](image-11.png)
 
 ### 3. Kết quả
-* **Flag:** `FLAG{D...}`
+* **Flag:** `FLAG{Dayum_this_is_secret_file}`
 
 ---
 github:https://github.com/Mai2el/Baocaomarddown.git
