@@ -1,4 +1,4 @@
-# 🚩 CTF Forensics Write-up Report
+#  CTF Forensics Write-up Report
 
 **Người thực hiện:** [Tên của bạn]  
 **Ngày báo cáo:** 14/04/2026  
@@ -6,26 +6,35 @@
 
 ---
 
-## 🧩 Challenge 1: micro_drive
+##  Challenge 1: micro_drive
 - **Level:** Beginner
-- **Mô tả:** Thiết bị lưu trữ nhỏ bé này vẫn đang che giấu điều gì đó thú vị.
+- **Decription:** This storage device is tiny, but it still hides something interesting.
+
 
 ### 1. Phân tích (Analysis)
-* **Dấu hiệu:** Mô tả gợi ý về một thiết bị lưu trữ (storage device). Đây thường là một file image của USB hoặc phân vùng nhỏ (FAT12/16).
-* **Công cụ:** `file`, `binwalk`, `Autopsy`, `TestDisk`.
+Khi dùng strings để đọc file và lọc bằng grep thì ta phát hiện có flag được giấu bên trong file iso này 
+```
+┌──(kali㉿Fintan)-[/mnt/hgfs/share/micro_drive/micro_drive]
+└─$ strings micro_drive.iso | grep FLAG
+FLAG.PNG;1
+```                                                                                
 
 ### 2. Quá trình thực hiện
-1.  Sử dụng lệnh `file micro_drive.img` để xác định hệ thống tệp (FileSystem).
-2.  Dùng `binwalk -e micro_drive.img` để kiểm tra các tệp tin được nhúng hoặc các tệp tin đã bị xóa nhưng chữ ký số (Magic bytes) vẫn còn.
-3.  Nếu không tìm thấy, nạp file vào **Autopsy** để khôi phục các tệp tin đã bị xóa (thường được đánh dấu bằng dấu X đỏ).
-4.  Kiểm tra các vùng trống (Unallocated Space) bằng trình chỉnh sửa Hex để tìm chuỗi `FLAG{`.
+Sử dụng binwalk và 7z để giải nén những file ẩn bên trong 
+```
+┌──(kali㉿Fintan)-[/mnt/hgfs/share/micro_drive/micro_drive]
+└─$ binwalk micro_drive.iso   
 
+DECIMAL       HEXADECIMAL     DESCRIPTION
+--------------------------------------------------------------------------------
+0             0x0             ISO 9660 Primary Volume,
+```
+Binwalk không có kết quả, 7z giải nén ra thì ta được một file ảnh với flag bên trong 
 ### 3. Kết quả
-* **Flag:** `FLAG{...}`
-
+![alt text](image-2.png)
 ---
 
-## 🧩 Challenge 2: qr_fragments
+##  Challenge 2: qr_fragments
 - **Level:** Beginner
 - **Mô tả:** Mã QR không còn nguyên vẹn, nhưng các mảnh vỡ có thể tiết lộ thông điệp.
 
@@ -43,7 +52,7 @@
 Flag: FLAG{How_scan_dalous}
 ---
 
-## 🧩 Challenge 3: late_night_live
+##  Challenge 3: late_night_live
 - **Level:** Easy
 - **Mô tả:** Một luồng livestream chứa đựng thứ gì đó đáng xem. Định dạng H.264.
 
@@ -62,7 +71,7 @@ Flag: FLAG{How_scan_dalous}
 
 ---
 
-## 🧩 Challenge 4: shadow_cache
+##  Challenge 4: shadow_cache
 - **Level:** Normal
 - **Mô tả:** Một máy trạm hoạt động lạ, điều tra viên thu được file cache.
 
@@ -82,7 +91,7 @@ Thu nhỏ cửa sổ thư mục lại.
 
 ---
 
-## 🧩 Challenge 5: miniature_view
+##  Challenge 5: miniature_view
 - **Level:** Normal
 - **Mô tả:** Mọi thứ dễ bị bỏ qua khi chúng bị thu nhỏ lại. Hãy nhìn kỹ vào bức ảnh tí hon này.
 
@@ -100,7 +109,7 @@ Thu nhỏ cửa sổ thư mục lại.
 
 ---
 
-## 🧩 Challenge 6: dumped_intrusion
+##  Challenge 6: dumped_intrusion
 - **Level:** Hard
 - **Mô tả:** Memory dump (2GB). Cần tìm flag bắt đầu bằng `FLAG{D`. Tránh bẫy `FLAG{H`.
 
