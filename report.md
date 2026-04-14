@@ -54,20 +54,61 @@ Flag: FLAG{How_scan_dalous}
 
 ##  Challenge 3: late_night_live
 - **Level:** Easy
-- **Mô tả:** Một luồng livestream chứa đựng thứ gì đó đáng xem. Định dạng H.264.
+- **Decription:**  I did not get famous overnight, but one of my streams still holds something worth watching. Tune in carefully and see what was left behind.
 
 ### 1. Phân tích (Analysis)
-* **Dấu hiệu:** Gợi ý về việc "quan sát kỹ" và "H.264". Flag có thể ẩn trong một frame hình ảnh hoặc dữ liệu phụ trợ của video.
-* **Công cụ:** `VLC Player`, `FFmpeg`, `Exiftool`.
-
+khi xem file pcap ta nhận thấy rằng có rất nhiều gói tin RTP, sau khi tìm hiểu thì gói tin RTP là giao thức dùng để truyền tải video, ta sẽ ghép tất cả các luồng này lại thành 1 video hoàn chỉnh 
 ### 2. Quá trình thực hiện
-1.  Sử dụng `exiftool` kiểm tra metadata, có thể flag nằm trong phần Comment hoặc Description của video.
-2.  Dùng `ffmpeg -i video.mp4 -vf "select=inframes" frames_%04d.png` để trích xuất toàn bộ frame.
-3.  Duyệt nhanh qua các frame hoặc sử dụng lệnh `grep` nếu flag ẩn trong text layer.
-4.  Kiểm tra các luồng (streams) khác như phụ đề ẩn bằng `ffprobe`.
+Viết code python để trích xuất nó thành file .h254 sau đó dùng ffmpeg để chuyển nó về file mp4
+```
+import scapy.all as scapy
+
+pcap_file = "file.pcap" # Đổi tên cho đúng file của bạn
+output_file = "fixed_video.h264"
+
+packets = scapy.rdpcap(pcap_file)
+rtp_packets = []
+
+print("Đang thu thập và sắp xếp gói tin...")
+
+for pkt in packets:
+    if pkt.haslayer(scapy.UDP) and len(pkt[scapy.UDP].payload) >= 12:
+        payload = bytes(pkt[scapy.UDP].payload)
+        # Lấy Sequence Number từ RTP Header (byte thứ 2 và 3)
+        seq_num = int.from_bytes(payload[2:4], byteorder='big')
+        rtp_packets.append((seq_num, payload[12:]))
+
+# Sắp xếp theo Sequence Number
+rtp_packets.sort(key=lambda x: x[0])
+
+print(f"Đã tìm thấy {len(rtp_packets)} gói tin RTP. Đang ghép...")
+
+with open(output_file, "wb") as f:
+    for seq, payload in rtp_packets:
+        if not payload: continue
+        
+        nal_type = payload[0] & 0x1F
+        
+        if 1 <= nal_type <= 23:
+            f.write(b"\x00\x00\x00\x01" + payload)
+        elif nal_type == 28: # FU-A (Gói bị chia nhỏ)
+            fu_header = payload[1]
+            if fu_header & 0x80: # Start bit
+                reconstructed_nal_header = bytes([(payload[0] & 0xE0) | (fu_header & 0x1F)])
+                f.write(b"\x00\x00\x00\x01" + reconstructed_nal_header + payload[2:])
+            else:
+                f.write(payload[2:])
+
+print(f"Hoàn thành! File đã lưu tại: {output_file}")
+```
+```
+┌──(kali㉿Fintan)-[/mnt/…/nam3/ki2/forencis/Baocaomarddown]
+└─$ ffmpeg -f h264 -i fixed_video.h264 -vcodec copy output.mp4
+```
 
 ### 3. Kết quả
-* **Flag:** `FLAG{...}`
+
+![alt text](image-3.png)
 
 ---
 
@@ -93,7 +134,7 @@ Thu nhỏ cửa sổ thư mục lại.
 
 ##  Challenge 5: miniature_view
 - **Level:** Normal
-- **Mô tả:** Mọi thứ dễ bị bỏ qua khi chúng bị thu nhỏ lại. Hãy nhìn kỹ vào bức ảnh tí hon này.
+- **Decription:** Some things are easy to miss when they are reduced to almost nothing. Look closely at this tiny image and see whether its small size is hiding a bigger secret.
 
 ### 1. Phân tích (Analysis)
 * **Dấu hiệu:** "Miniature", "Reduced". Có khả năng flag nằm trong **Thumbnail** (ảnh thu nhỏ) của file gốc hoặc sử dụng kỹ thuật giấu tin LSB.
