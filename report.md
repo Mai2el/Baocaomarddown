@@ -137,16 +137,21 @@ Thu nhỏ cửa sổ thư mục lại.
 - **Decription:** Some things are easy to miss when they are reduced to almost nothing. Look closely at this tiny image and see whether its small size is hiding a bigger secret.
 
 ### 1. Phân tích (Analysis)
-* **Dấu hiệu:** "Miniature", "Reduced". Có khả năng flag nằm trong **Thumbnail** (ảnh thu nhỏ) của file gốc hoặc sử dụng kỹ thuật giấu tin LSB.
-* **Công cụ:** `StegSolve`, `Exiftool`, `Strings`.
-
+Vì đây là một ảnh rất nhỏ ta sẽ xem xét nó gồm bao nhiêu data
+```
+└─$ identify -verbose miniature_view.jpg | grep Geometry 
+  Geometry: 10x10+0+0
+identify: Corrupt JPEG data: 41234 extraneous bytes before marker 0xd9 `miniature_view.jpg' @ warning/jpeg.c/JPEGWarningHandler/433.
+```                     
+vì chỉ có 10x10 mà tận 41234  byte nên ta sẽ thử phóng to ảnh lên bằng cách điều chỉnh giá trị chiều dài và chiều rộng của bức ảnh 
 ### 2. Quá trình thực hiện
-1.  Kiểm tra metadata bằng `exiftool`. Đôi khi Thumbnail lưu trong metadata là một ảnh hoàn toàn khác với ảnh lớn.
-2.  Sử dụng `strings -n 10` để xem có chuỗi dữ liệu nào ẩn ở cuối file (sau ký tự kết thúc ảnh).
-3.  Dùng **StegSolve** duyệt qua các Bit Planes. Kiểm tra `Random Color Map` để tìm các điểm ảnh bất thường ở kích thước cực nhỏ.
 
+![alt text](image-5.png)
+
+thay đổi tại vị trí D90 thành 01 00 00 A0 đây là vị trí chiều dài và chiều rộng của bức ảnh 
 ### 3. Kết quả
-* **Flag:** `FLAG{...}`
+
+![alt text](image-4.png)
 
 ---
 
