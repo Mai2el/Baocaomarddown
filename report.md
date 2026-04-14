@@ -1,8 +1,9 @@
 #  CTF Forensics Write-up Report
 
-**Người thực hiện:** [Tên của bạn]  
-**Ngày báo cáo:** 14/04/2026  
-**Tổng số thử thách:** 06
+**Nhóm 14** 
+* Võ Hoài Nam - 23520990
+* Nguyễn Huỳnh Nhân - 23521080 
+
 
 ---
 
@@ -113,7 +114,8 @@ print(f"Hoàn thành! File đã lưu tại: {output_file}")
 
 ##  Challenge 4: shadow_cache
 - **Level:** Normal
-- **Mô tả:** Một máy trạm hoạt động lạ, điều tra viên thu được file cache.
+- **Mô tả:** A workstation began behaving strangely, raising concerns that someone may have tampered with it.
+Investigators managed to recover a cache file from the machine. Examine the artifact carefully and determine what really happened.
 
 ### 1. Phân tích (Analysis)
 * **Dấu hiệu:**  "Cache file". ".bin"
@@ -156,15 +158,21 @@ thay đổi tại vị trí D90 thành 01 00 00 A0 đây là vị trí chiều d
 
 ##  Challenge 6: dumped_intrusion
 - **Level:** Hard
-- **Mô tả:** Memory dump (2GB). Cần tìm flag bắt đầu bằng `FLAG{D`. Tránh bẫy `FLAG{H`.
+- **Mô tả:** An unknown file was opened on a system, and shortly afterward the machine began acting abnormally.
+To preserve the evidence, a full memory dump was captured for analysis. Your task is to reconstruct how the compromise happened and identify the correct flag.
+
+The memory image is quite large and can be downloaded from the provided URL.
+(Extraction size: approximately 2 GB).
 
 ### 1. Phân tích (Analysis)
 * **Dấu hiệu:** Phân tích bộ nhớ (Memory Forensics). Cần tìm dấu vết xâm nhập.
 * **Công cụ:** `Volatility 3`.
 
 ### 2. Quá trình thực hiện
-1.  **Xác định Profile:** `python3 vol.py -f memory.dmp windows.info`.
-2.  **Kiểm tra tiến trình:** `windows.pslist` để tìm tiến trình lạ, hoặc `windows.cmdline` để xem các lệnh đã thực thi.
+1.  **Xác định Profile:** `python3 vol.py -f dumped_intrusion.dmp windows.info`.
+![alt text](image-6.png)
+2.  **Kiểm tra tiến trình:** `windows.pslist` để tìm tiến trình lạ.
+![alt text](image-7.png)
 3.  **Quét file:** `windows.filescan | grep -E "flag|secret|document"`.
 4.  **Phân tích bẫy:** Sử dụng `strings memory.dmp | grep "FLAG{D"` để lọc thẳng flag đúng, loại bỏ decoy `FLAG{H`.
 5.  **Dump tiến trình:** Nếu flag nằm trong bộ nhớ của một app (như Notepad), thực hiện `windows.memmap --pid <PID> --dump`.
@@ -173,3 +181,4 @@ thay đổi tại vị trí D90 thành 01 00 00 A0 đây là vị trí chiều d
 * **Flag:** `FLAG{D...}`
 
 ---
+github:https://github.com/Mai2el/Baocaomarddown.git
